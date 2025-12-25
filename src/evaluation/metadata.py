@@ -4,7 +4,7 @@ from openbench.utils import BenchmarkMetadata
 def get_benchmark_suite() -> dict[str, BenchmarkMetadata]:
     """Return benchmark metadata for entry point registration."""
     return {
-        "longmemeval-small": BenchmarkMetadata(
+        "longmemeval_small": BenchmarkMetadata(
             name="LongMemEval (small)",
             description="A benchmark for evaluating the long-term memory of chat assistants",
             category="community",
@@ -13,7 +13,7 @@ def get_benchmark_suite() -> dict[str, BenchmarkMetadata]:
             function_name="evaluate_qa_inspect_small",
             is_alpha=False,
         ),
-        "longmemeval-oracle": BenchmarkMetadata(
+        "longmemeval_oracle": BenchmarkMetadata(
             name="LongMemEval (oracle)",
             description="A benchmark for evaluating the long-term memory of chat assistants",
             category="community",
@@ -21,5 +21,86 @@ def get_benchmark_suite() -> dict[str, BenchmarkMetadata]:
             module_path="evaluation.evaluate_qa_inspect",
             function_name="evaluate_qa_inspect_oracle",
             is_alpha=False,
-        )
+        ),
+        "longmemeval_medium_supermemory": BenchmarkMetadata(
+            name="LongMemEval (medium, supermemory)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "supermemory"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_medium_supermemory",
+            is_alpha=False,
+        ),
+        "longmemeval_small_supermemory": BenchmarkMetadata(
+            name="LongMemEval (small, supermemory)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "supermemory"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_small_supermemory",
+            is_alpha=False,
+        ),
+        "longmemeval_oracle_supermemory": BenchmarkMetadata(
+            name="LongMemEval (oracle, supermemory)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "supermemory"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_oracle_supermemory",
+            is_alpha=False,
+        ),
+        "longmemeval_small_mem0": BenchmarkMetadata(
+            name="LongMemEval (small, mem0)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "mem0"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_small_mem0",
+            is_alpha=False,
+        ),
+        "longmemeval_oracle_mem0": BenchmarkMetadata(
+            name="LongMemEval (oracle, mem0)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "mem0"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_oracle_mem0",
+            is_alpha=False,
+        ),
+        "longmemeval_medium_mem0": BenchmarkMetadata(
+            name="LongMemEval (medium, mem0)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "mem0"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_medium_mem0",
+            is_alpha=False,
+        ),
+        "longmemeval_small_zep": BenchmarkMetadata(
+            name="LongMemEval (small, zep)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "zep"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_small_zep",
+            is_alpha=False,
+        ),
+        "longmemeval_oracle_zep": BenchmarkMetadata(
+            name="LongMemEval (oracle, zep)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "zep"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_oracle_zep",
+            is_alpha=False,
+        ),
+        "longmemeval_medium_zep": BenchmarkMetadata(
+            name="LongMemEval (medium, zep)",
+            description="A benchmark for evaluating the long-term memory of chat assistants",
+            category="community",
+            tags=["long-term memory", "chat assistants", "zep"],
+            module_path="evaluation.evaluate_qa_inspect",
+            function_name="evaluate_qa_inspect_medium_zep",
+            is_alpha=False,
+        ),
     }

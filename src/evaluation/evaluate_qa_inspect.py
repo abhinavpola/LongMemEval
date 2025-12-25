@@ -1,10 +1,10 @@
 import re
-from inspect_ai import Task, task
+from inspect_ai import Task, task, task_with
 from inspect_ai.dataset import (
     MemoryDataset,
     Sample,
 )
-from inspect_ai.model import ChatMessageAssistant, ChatMessageUser, Model, get_model
+from inspect_ai.model import Model, get_model
 from inspect_ai.scorer import (
     INCORRECT,
     Score,
@@ -14,10 +14,14 @@ from inspect_ai.scorer import (
     scorer,
     stderr,
 )
-from inspect_ai.solver import Generate, TaskState, solver
+from inspect_ai.solver import TaskState, generate
 from huggingface_hub import hf_hub_download
 from evaluation.get_judge_prompt import get_anscheck_prompt
 import pandas as pd
+from evaluation.solvers.in_context import in_context_setup
+from evaluation.solvers.mem0 import mem0_cleanup, mem0_setup
+from evaluation.solvers.supermemory import supermemory_cleanup, supermemory_setup
+from evaluation.solvers.zep import zep_cleanup, zep_setup
 
 
 @task
@@ -30,7 +34,144 @@ def evaluate_qa_inspect_oracle():
     return create_task("longmemeval_oracle.json")
 
 
+@task
+def evaluate_qa_inspect_small_supermemory():
+    return task_with(
+        evaluate_qa_inspect_small(),
+        setup=[
+            supermemory_setup(only_answer_turns=False),
+        ],
+        solver=generate(),
+        cleanup=supermemory_cleanup,
+    )
+
+
+@task
+def evaluate_qa_inspect_oracle_supermemory():
+    return task_with(
+        evaluate_qa_inspect_oracle(),
+        setup=[
+            supermemory_setup(only_answer_turns=True),
+        ],
+        solver=generate(),
+        cleanup=supermemory_cleanup,
+    )
+
+
+@task
+def evaluate_qa_inspect_medium_supermemory():
+    return create_supermemory_task(
+        "longmemeval_m_cleaned.json",
+        only_answer_turns=False,
+    )
+
+
+@task
+def evaluate_qa_inspect_small_mem0():
+    return task_with(
+        evaluate_qa_inspect_small(),
+        setup=mem0_setup(only_answer_turns=False),
+        solver=generate(),
+        cleanup=mem0_cleanup,
+    )
+
+
+@task
+def evaluate_qa_inspect_oracle_mem0():
+    return task_with(
+        evaluate_qa_inspect_oracle(),
+        setup=mem0_setup(only_answer_turns=True),
+        solver=generate(),
+        cleanup=mem0_cleanup,
+    )
+
+
+@task
+def evaluate_qa_inspect_medium_mem0():
+    return create_mem0_task(
+        "longmemeval_m_cleaned.json",
+        only_answer_turns=False,
+    )
+
+
+@task
+def evaluate_qa_inspect_small_zep():
+    return task_with(
+        evaluate_qa_inspect_small(),
+        setup=zep_setup(only_answer_turns=False),
+        solver=generate(),
+        cleanup=zep_cleanup,
+    )
+
+
+@task
+def evaluate_qa_inspect_oracle_zep():
+    return task_with(
+        evaluate_qa_inspect_oracle(),
+        setup=zep_setup(only_answer_turns=True),
+        solver=generate(),
+        cleanup=zep_cleanup,
+    )
+
+
+@task
+def evaluate_qa_inspect_medium_zep():
+    return create_zep_task(
+        "longmemeval_m_cleaned.json",
+        only_answer_turns=False,
+    )
+
+
 def create_task(filename: str) -> Task:
+    memory_dataset = build_dataset(filename)
+    return Task(
+        dataset=memory_dataset,
+        setup=in_context_setup(),
+        solver=generate(),
+        scorer=model_graded_qa(),
+        name="longmemeval",
+    )
+
+
+def create_supermemory_task(filename: str, only_answer_turns: bool) -> Task:
+    memory_dataset = build_dataset(filename)
+    return Task(
+        dataset=memory_dataset,
+        setup=[
+            supermemory_setup(only_answer_turns=only_answer_turns),
+        ],
+        solver=generate(),
+        cleanup=supermemory_cleanup,
+        scorer=model_graded_qa(),
+        name="longmemeval",
+    )
+
+
+def create_mem0_task(filename: str, only_answer_turns: bool) -> Task:
+    memory_dataset = build_dataset(filename)
+    return Task(
+        dataset=memory_dataset,
+        setup=mem0_setup(only_answer_turns=only_answer_turns),
+        solver=generate(),
+        cleanup=mem0_cleanup,
+        scorer=model_graded_qa(),
+        name="longmemeval",
+    )
+
+
+def create_zep_task(filename: str, only_answer_turns: bool) -> Task:
+    memory_dataset = build_dataset(filename)
+    return Task(
+        dataset=memory_dataset,
+        setup=zep_setup(only_answer_turns=only_answer_turns),
+        solver=generate(),
+        cleanup=zep_cleanup,
+        scorer=model_graded_qa(),
+        name="longmemeval",
+    )
+
+
+def build_dataset(filename: str) -> MemoryDataset:
     raw_path = hf_hub_download(
         repo_id="xiaowu0162/longmemeval-cleaned",
         filename=filename,
@@ -62,12 +203,7 @@ def create_task(filename: str) -> Task:
         ]
     )
 
-    return Task(
-        dataset=memory_dataset,
-        solver=[in_context_solver()],
-        scorer=model_graded_qa(),
-        name="longmemeval",
-    )
+    return memory_dataset
 
 
 @scorer(metrics=[accuracy(), stderr()])
@@ -102,20 +238,3 @@ def model_graded_qa(
             )
 
     return score
-
-
-@solver
-def in_context_solver():
-    async def solve(state: TaskState, generate: Generate):
-        history = []
-        for session in state.metadata["haystack_sessions"]:
-            for turn in session:
-                if turn["role"] == "user":
-                    history.append(ChatMessageUser(content=turn["content"]))
-                elif turn["role"] == "assistant":
-                    history.append(ChatMessageAssistant(content=turn["content"]))
-
-        state.messages = history + state.messages
-        return await generate(state)
-
-    return solve

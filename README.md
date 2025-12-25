@@ -20,7 +20,23 @@ You should then be able to see `longmemeval` listed under community benchmarks w
 `uv run bench list`
 
 To run the benchmarks:
-`uv run --env-file .env bench eval longmemeval-small --model openai/gpt-5-nano`
+
+| Provider | Command |
+| --- | --- |
+| In-context | `uv run --env-file .env bench eval longmemeval_small --model openai/gpt-5-nano` |
+| Supermemory | `uv run --env-file .env bench eval longmemeval_small_supermemory --model openai/gpt-5-nano --limit 5` |
+| Mem0 | `uv run --env-file .env bench eval longmemeval_small_mem0 --model openai/gpt-5-nano --limit 5` |
+| Zep | `uv run --env-file .env bench eval longmemeval_small_zep --model openai/gpt-5-nano --limit 5` |
+
+Use `--model-role grader=openai/gpt-5-nano` to change the grader model.
+
+## Typecheck/lint
+
+```
+uvx ty check
+uvx ruff check
+uvx ruff format
+```
 
 ## Citation
 
