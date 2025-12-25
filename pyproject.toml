@@ -1,0 +1,18 @@
+[project]
+name = "longmemeval"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "backoff",
+    "nltk",
+    "numpy",
+    "openai",
+    "openbench>=0.5.2",
+    "packaging",
+    "tqdm",
+]
+
+[project.entry-points."openbench.benchmarks"]
+longmemeval = "evaluation.metadata:get_benchmark_suite"
